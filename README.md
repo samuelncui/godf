@@ -1,23 +1,8 @@
-go-disk-usage
+godf
 =============
 
-Get disk usage information like how much space is available, free, and used.  
+Get disk usage information like how much space is available, free, and used. Just like old school `df` command.
+Based on [github.com/ricochet2200/go-disk-usage](https://github.com/ricochet2200/go-disk-usage), add error return to avoid unexpected problems.
 
 ## Documentation
-Documentation can be found [here](https://godoc.org/github.com/ricochet2200/go-disk-usage/du) and there is a [short example](https://github.com/ricochet2200/go-disk-usage/blob/master/duexample.go) of how to use this library.
-
-## Compatibility
-This works for Windows, MacOS, and Linux although there may some minor variability between what this library reports and what you get from `df`.  This library will maintain reverse compatability, any breaking changes will be made to a forked repository.
-
-## Install
-
-```bash
-go get -u "github.com/ricochet2200/go-disk-usage/du"
-```
-
-## Usage
-
-```go
-import "github.com/ricochet2200/go-disk-usage/du"
-usage := du.New("/path/to")
-```
+[Here](https://github.com/samuelncui/godf/blob/master/example/main.go) is usage example.
