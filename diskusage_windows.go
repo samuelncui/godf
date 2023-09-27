@@ -5,6 +5,7 @@ package godf
 
 import (
 	"fmt"
+	"sync"
 	"syscall"
 	"unsafe"
 )
@@ -15,17 +16,34 @@ type DiskUsage struct {
 	availBytes int64
 }
 
+var (
+	proc    *syscall.Proc
+	procErr error
+	once    sync.Once
+)
+
+func initProc() {
+	h, err := syscall.LoadDLL("kernel32.dll")
+	if err != nil {
+		procErr = fmt.Errorf("load dll kernel32.dll fail, %w", err)
+		return
+	}
+
+	p, err := h.FindProc("GetDiskFreeSpaceExW")
+	if err != nil {
+		procErr = fmt.Errorf("load proc GetDiskFreeSpaceExW from kernel32.dll fail, %w", err)
+		return
+	}
+
+	proc = p
+}
+
 // NewDiskUsages returns an object holding the disk usage of volumePath
 // or nil in case of error (invalid path, etc)
 func NewDiskUsage(volumePath string) (*DiskUsage, error) {
-	h, err := syscall.LoadDLL("kernel32.dll")
-	if err != nil {
-		return nil, fmt.Errorf("load dll kernel32.dll fail, %w", err)
-	}
-
-	c, err := h.FindProc("GetDiskFreeSpaceExW")
-	if err != nil {
-		return nil, fmt.Errorf("load proc GetDiskFreeSpaceExW from kernel32.dll fail, %w", err)
+	once.Do(initProc)
+	if procErr != nil {
+		return nil, procErr
 	}
 
 	pathPtr, err := syscall.UTF16PtrFromString(volumePath)
@@ -34,7 +52,7 @@ func NewDiskUsage(volumePath string) (*DiskUsage, error) {
 	}
 
 	du := new(DiskUsage)
-	if _, _, err := c.Call(
+	if _, _, err := proc.Call(
 		uintptr(unsafe.Pointer(pathPtr)),
 		uintptr(unsafe.Pointer(&du.freeBytes)),
 		uintptr(unsafe.Pointer(&du.totalBytes)),
