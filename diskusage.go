@@ -1,6 +1,7 @@
+//go:build !windows
 // +build !windows
 
-package du
+package godf
 
 import "syscall"
 
@@ -11,11 +12,13 @@ type DiskUsage struct {
 
 // NewDiskUsages returns an object holding the disk usage of volumePath
 // or nil in case of error (invalid path, etc)
-func NewDiskUsage(volumePath string) *DiskUsage {
+func NewDiskUsage(volumePath string) (*DiskUsage, error) {
+	stat := new(syscall.Statfs_t)
+	if err := syscall.Statfs(volumePath, stat); err != nil {
+		return nil, err
+	}
 
-	var stat syscall.Statfs_t
-	syscall.Statfs(volumePath, &stat)
-	return &DiskUsage{&stat}
+	return &DiskUsage{stat}, nil
 }
 
 // Free returns total free bytes on file system

@@ -1,14 +1,19 @@
-package du
+package main
 
 import (
 	"fmt"
-	"testing"
+
+	"github.com/samuelncui/godf"
 )
 
 var KB = uint64(1024)
 
-func TestNewDiskUsage(t *testing.T) {
-	usage := NewDiskUsage(".")
+func main() {
+	usage, err := godf.NewDiskUsage(".")
+	if err != nil {
+		panic(err)
+	}
+
 	fmt.Println("Free:", usage.Free()/(KB*KB))
 	fmt.Println("Available:", usage.Available()/(KB*KB))
 	fmt.Println("Size:", usage.Size()/(KB*KB))

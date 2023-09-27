@@ -1,6 +1,10 @@
-package du
+//go:build windows
+// +build windows
+
+package godf
 
 import (
+	"fmt"
 	"syscall"
 	"unsafe"
 )
@@ -13,20 +17,33 @@ type DiskUsage struct {
 
 // NewDiskUsages returns an object holding the disk usage of volumePath
 // or nil in case of error (invalid path, etc)
-func NewDiskUsage(volumePath string) *DiskUsage {
+func NewDiskUsage(volumePath string) (*DiskUsage, error) {
+	h, err := syscall.LoadDLL("kernel32.dll")
+	if err != nil {
+		return nil, fmt.Errorf("load dll kernel32.dll fail, %w", err)
+	}
 
-	h := syscall.MustLoadDLL("kernel32.dll")
-	c := h.MustFindProc("GetDiskFreeSpaceExW")
+	c, err := h.FindProc("GetDiskFreeSpaceExW")
+	if err != nil {
+		return nil, fmt.Errorf("load proc GetDiskFreeSpaceExW from kernel32.dll fail, %w", err)
+	}
 
-	du := &DiskUsage{}
+	pathPtr, err := syscall.UTF16PtrFromString(volumePath)
+	if err != nil {
+		return nil, fmt.Errorf("convert string to utf16 failed, %w", err)
+	}
 
-	c.Call(
-		uintptr(unsafe.Pointer(syscall.StringToUTF16Ptr(volumePath))),
+	du := new(DiskUsage)
+	if _, _, err := c.Call(
+		uintptr(unsafe.Pointer(pathPtr)),
 		uintptr(unsafe.Pointer(&du.freeBytes)),
 		uintptr(unsafe.Pointer(&du.totalBytes)),
-		uintptr(unsafe.Pointer(&du.availBytes)))
+		uintptr(unsafe.Pointer(&du.availBytes)),
+	); err != nil {
+		return nil, fmt.Errorf("call dll method fail, %w", err)
+	}
 
-	return du
+	return du, nil
 }
 
 // Free returns total free bytes on file system
