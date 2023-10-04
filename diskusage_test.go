@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-var KB = uint64(1024)
+var KB = int64(1024)
 
 func TestNewDiskUsage(t *testing.T) {
 	usage, err := NewDiskUsage(".")

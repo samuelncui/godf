@@ -6,7 +6,7 @@ import (
 	"github.com/samuelncui/godf"
 )
 
-var KB = uint64(1024)
+var KB = int64(1024)
 
 func main() {
 	usage, err := godf.NewDiskUsage(".")

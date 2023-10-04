@@ -65,26 +65,26 @@ func NewDiskUsage(volumePath string) (*DiskUsage, error) {
 }
 
 // Free returns total free bytes on file system
-func (du *DiskUsage) Free() uint64 {
-	return uint64(du.freeBytes)
+func (du *DiskUsage) Free() int64 {
+	return du.freeBytes
 }
 
 // Available returns total available bytes on file system to an unprivileged user
-func (du *DiskUsage) Available() uint64 {
-	return uint64(du.availBytes)
+func (du *DiskUsage) Available() int64 {
+	return du.availBytes
 }
 
 // Size returns total size of the file system
-func (du *DiskUsage) Size() uint64 {
-	return uint64(du.totalBytes)
+func (du *DiskUsage) Size() int64 {
+	return du.totalBytes
 }
 
 // Used returns total bytes used in file system
-func (du *DiskUsage) Used() uint64 {
+func (du *DiskUsage) Used() int64 {
 	return du.Size() - du.Free()
 }
 
 // Usage returns percentage of use on the file system
-func (du *DiskUsage) Usage() float32 {
-	return float32(du.Used()) / float32(du.Size())
+func (du *DiskUsage) Usage() float64 {
+	return float64(du.Used()) / float64(du.Size())
 }
